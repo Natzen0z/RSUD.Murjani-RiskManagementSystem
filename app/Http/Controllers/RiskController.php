@@ -6,6 +6,7 @@ use App\Models\Risk;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\View\View;
+use Illuminate\Support\Facades\Auth;
 
 class RiskController extends Controller
 {
@@ -14,7 +15,12 @@ class RiskController extends Controller
      */
     public function index(): View
     {
-        $risks = Risk::orderBy('created_at', 'desc')->get();
+        // Admin sees all risks, regular users see only their own
+        if (Auth::user()->isAdmin()) {
+            $risks = Risk::orderBy('created_at', 'desc')->get();
+        } else {
+            $risks = Risk::where('user_id', Auth::id())->orderBy('created_at', 'desc')->get();
+        }
         
         return view('risk', [
             'risks' => $risks,
@@ -46,6 +52,7 @@ class RiskController extends Controller
 
         $validated['kode'] = Risk::generateNextKode();
         $validated['validasi'] = 'Menunggu';
+        $validated['user_id'] = Auth::id();
         
         $risk = Risk::create($validated);
 
@@ -61,6 +68,11 @@ class RiskController extends Controller
      */
     public function update(Request $request, Risk $risk): JsonResponse
     {
+        // Check ownership (admin can update any, users only their own)
+        if (!Auth::user()->isAdmin() && $risk->user_id !== Auth::id()) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+
         $validated = $request->validate([
             'unit' => 'sometimes|required|string|max:255',
             'kategori' => 'sometimes|required|string|max:255',
@@ -95,6 +107,11 @@ class RiskController extends Controller
      */
     public function destroy(Risk $risk): JsonResponse
     {
+        // Check ownership (admin can delete any, users only their own)
+        if (!Auth::user()->isAdmin() && $risk->user_id !== Auth::id()) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+
         $risk->delete();
 
         return response()->json([
@@ -108,7 +125,12 @@ class RiskController extends Controller
      */
     public function statistics(): JsonResponse
     {
-        $risks = Risk::all();
+        // Admin sees all, users see only their own
+        if (Auth::user()->isAdmin()) {
+            $risks = Risk::all();
+        } else {
+            $risks = Risk::where('user_id', Auth::id())->get();
+        }
         
         $total = $risks->count();
         $highRisk = $risks->filter(fn($r) => in_array($r->awal_level, ['Tinggi', 'Kritis']))->count();
@@ -127,3 +149,4 @@ class RiskController extends Controller
         ]);
     }
 }
+

@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Risk extends Model
 {
     protected $fillable = [
+        'user_id',
         'kode',
         'unit',
         'kategori',
@@ -26,6 +27,14 @@ class Risk extends Model
         'triwulan',
         'period_year',
     ];
+
+    /**
+     * Get the user that owns the risk
+     */
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 
     protected $appends = [
         'awal_skor',

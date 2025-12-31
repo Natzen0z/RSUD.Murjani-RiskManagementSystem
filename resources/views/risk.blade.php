@@ -69,6 +69,28 @@
                 </div>
                 <p class="font-bold text-sm text-white" x-text="globalPeriod"></p>
             </div>
+            <!-- User Info -->
+            <div class="px-4 py-4 bg-slate-800 rounded-xl border border-slate-700">
+                <div class="flex items-center mb-2 text-teal-400">
+                   <i data-lucide="user-circle" class="w-4 h-4 mr-2"></i>
+                   <p class="text-xs font-semibold uppercase tracking-wider">User</p>
+                </div>
+                <p class="font-bold text-sm text-white">{{ Auth::user()->name }}</p>
+                <p class="text-xs text-slate-400">{{ Auth::user()->email }}</p>
+            </div>
+            @if(Auth::user()->isAdmin())
+            <a href="{{ route('admin.dashboard') }}" class="w-full bg-amber-600 hover:bg-amber-700 text-white py-3 px-4 rounded-xl flex items-center justify-center font-semibold shadow-lg transition-all">
+                <i data-lucide="shield-check" class="w-5 h-5 mr-2"></i>
+                <span>Admin Panel</span>
+            </a>
+            @endif
+            <form method="POST" action="{{ route('logout') }}">
+                @csrf
+                <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white py-3 px-4 rounded-xl flex items-center justify-center font-semibold shadow-lg transition-all">
+                    <i data-lucide="log-out" class="w-5 h-5 mr-2"></i>
+                    <span>Logout</span>
+                </button>
+            </form>
         </div>
     </div>
 
@@ -223,7 +245,7 @@
                 return this.riskData.filter(item => {
                     const matchesSearch = (item.risiko && item.risiko.toLowerCase().includes(this.searchTerm.toLowerCase())) ||
                                         (item.kategori && item.kategori.toLowerCase().includes(this.searchTerm.toLowerCase()));
-                    const matchesUnit = this.filterUnit === '' || (item.unit && item.unit.toLowerCase().includes(this.filterUnit.toLowerCase()));
+                    const matchesUnit = this.filterUnit === '' || item.unit === this.filterUnit;
                     return matchesSearch && matchesUnit;
                 });
             },
@@ -384,6 +406,99 @@
                 regSheet.getColumn(18).width = 12; // Status
                 regSheet.getColumn(19).width = 12; // Validasi
                 regSheet.getColumn(20).width = 15; // Validator
+
+                // ============ SIGNATURE SECTION ============
+                const lastDataRow = regSheet.lastRow.number;
+                const signatureStartRow = lastDataRow + 4;
+                
+                // Add spacing rows
+                regSheet.addRow([]);
+                regSheet.addRow([]);
+                regSheet.addRow([]);
+                
+                // Signature header row - right to left: Risk Owner, Reviewer, Validator, Approval
+                const signatureRow = signatureStartRow;
+                
+                // Column positions for 4 signatures (using columns: A-E, F-J, K-O, P-T)
+                // Order from left to right: Approval, Validator, Reviewer, Risk Owner
+                
+                // Approval (Director) - Columns A-E
+                regSheet.mergeCells(signatureRow, 1, signatureRow, 5);
+                regSheet.getCell(signatureRow, 1).value = 'Approval';
+                regSheet.getCell(signatureRow, 1).font = { bold: true, size: 11 };
+                regSheet.getCell(signatureRow, 1).alignment = { horizontal: 'center' };
+                
+                regSheet.mergeCells(signatureRow + 1, 1, signatureRow + 1, 5);
+                regSheet.getCell(signatureRow + 1, 1).value = '(Direktur)';
+                regSheet.getCell(signatureRow + 1, 1).font = { italic: true, size: 10, color: { argb: 'FF64748B' } };
+                regSheet.getCell(signatureRow + 1, 1).alignment = { horizontal: 'center' };
+                
+                // Signature line
+                regSheet.mergeCells(signatureRow + 5, 1, signatureRow + 5, 5);
+                regSheet.getCell(signatureRow + 5, 1).value = '________________________';
+                regSheet.getCell(signatureRow + 5, 1).alignment = { horizontal: 'center' };
+                
+                regSheet.mergeCells(signatureRow + 6, 1, signatureRow + 6, 5);
+                regSheet.getCell(signatureRow + 6, 1).value = '(                                        )';
+                regSheet.getCell(signatureRow + 6, 1).alignment = { horizontal: 'center' };
+                
+                // Validator (Head of Quality Committee) - Columns F-J
+                regSheet.mergeCells(signatureRow, 6, signatureRow, 10);
+                regSheet.getCell(signatureRow, 6).value = 'Validator';
+                regSheet.getCell(signatureRow, 6).font = { bold: true, size: 11 };
+                regSheet.getCell(signatureRow, 6).alignment = { horizontal: 'center' };
+                
+                regSheet.mergeCells(signatureRow + 1, 6, signatureRow + 1, 10);
+                regSheet.getCell(signatureRow + 1, 6).value = '(Ketua Komite Mutu)';
+                regSheet.getCell(signatureRow + 1, 6).font = { italic: true, size: 10, color: { argb: 'FF64748B' } };
+                regSheet.getCell(signatureRow + 1, 6).alignment = { horizontal: 'center' };
+                
+                regSheet.mergeCells(signatureRow + 5, 6, signatureRow + 5, 10);
+                regSheet.getCell(signatureRow + 5, 6).value = '________________________';
+                regSheet.getCell(signatureRow + 5, 6).alignment = { horizontal: 'center' };
+                
+                regSheet.mergeCells(signatureRow + 6, 6, signatureRow + 6, 10);
+                regSheet.getCell(signatureRow + 6, 6).value = '(                                        )';
+                regSheet.getCell(signatureRow + 6, 6).alignment = { horizontal: 'center' };
+                
+                // Reviewer (Risk Management Subcommittee) - Columns K-O
+                regSheet.mergeCells(signatureRow, 11, signatureRow, 15);
+                regSheet.getCell(signatureRow, 11).value = 'Reviewer';
+                regSheet.getCell(signatureRow, 11).font = { bold: true, size: 11 };
+                regSheet.getCell(signatureRow, 11).alignment = { horizontal: 'center' };
+                
+                regSheet.mergeCells(signatureRow + 1, 11, signatureRow + 1, 15);
+                regSheet.getCell(signatureRow + 1, 11).value = '(Sub Komite Manajemen Risiko)';
+                regSheet.getCell(signatureRow + 1, 11).font = { italic: true, size: 10, color: { argb: 'FF64748B' } };
+                regSheet.getCell(signatureRow + 1, 11).alignment = { horizontal: 'center' };
+                
+                regSheet.mergeCells(signatureRow + 5, 11, signatureRow + 5, 15);
+                regSheet.getCell(signatureRow + 5, 11).value = '________________________';
+                regSheet.getCell(signatureRow + 5, 11).alignment = { horizontal: 'center' };
+                
+                regSheet.mergeCells(signatureRow + 6, 11, signatureRow + 6, 15);
+                regSheet.getCell(signatureRow + 6, 11).value = '(                                        )';
+                regSheet.getCell(signatureRow + 6, 11).alignment = { horizontal: 'center' };
+                
+                // Risk Owner - Columns P-T
+                regSheet.mergeCells(signatureRow, 16, signatureRow, 20);
+                regSheet.getCell(signatureRow, 16).value = 'Risk Owner';
+                regSheet.getCell(signatureRow, 16).font = { bold: true, size: 11 };
+                regSheet.getCell(signatureRow, 16).alignment = { horizontal: 'center' };
+                
+                regSheet.mergeCells(signatureRow + 1, 16, signatureRow + 1, 20);
+                regSheet.getCell(signatureRow + 1, 16).value = '(Pemilik Risiko)';
+                regSheet.getCell(signatureRow + 1, 16).font = { italic: true, size: 10, color: { argb: 'FF64748B' } };
+                regSheet.getCell(signatureRow + 1, 16).alignment = { horizontal: 'center' };
+                
+                regSheet.mergeCells(signatureRow + 5, 16, signatureRow + 5, 20);
+                regSheet.getCell(signatureRow + 5, 16).value = '________________________';
+                regSheet.getCell(signatureRow + 5, 16).alignment = { horizontal: 'center' };
+                
+                regSheet.mergeCells(signatureRow + 6, 16, signatureRow + 6, 20);
+                regSheet.getCell(signatureRow + 6, 16).value = '(                                        )';
+                regSheet.getCell(signatureRow + 6, 16).alignment = { horizontal: 'center' };
+
 
                 // ============ SHEET 3: MATRIX ============
                 const matSheet = workbook.addWorksheet('Matriks Risiko');

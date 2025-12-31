@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('risks', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->nullable()->constrained()->onDelete('cascade');
             $table->string('kode')->unique(); // R-001, R-002, etc.
             $table->string('unit'); // Hospital unit/department
             $table->string('kategori'); // Strategis, Operasional, Fraud, etc.

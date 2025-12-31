@@ -53,7 +53,46 @@
             <div class="md:col-span-3 space-y-3">
                 <div>
                     <label class="block text-slate-500 mb-1">Unit/Bagian</label>
-                    <input type="text" x-model="newRisk.unit" class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-teal-500" placeholder="Ketik nama unit...">
+                    <select x-model="newRisk.unit" class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-teal-500">
+                        <option value="">-- Pilih Unit --</option>
+                        <option value="UGD">UGD</option>
+                        <option value="Poliklinik">Poliklinik</option>
+                        <option value="PONEK">PONEK</option>
+                        <option value="OK Cyto">OK Cyto</option>
+                        <option value="Laboratorium Patologi Klinik">Laboratorium Patologi Klinik</option>
+                        <option value="Laboratorium Patologi Anatomis">Laboratorium Patologi Anatomis</option>
+                        <option value="Bank Darah">Bank Darah</option>
+                        <option value="Radiologi">Radiologi</option>
+                        <option value="Depo UGD">Depo UGD</option>
+                        <option value="Depo Rawat Jalan">Depo Rawat Jalan</option>
+                        <option value="Dialisis">Dialisis</option>
+                        <option value="ICU">ICU</option>
+                        <option value="OK Elektif">OK Elektif</option>
+                        <option value="SIM-RS">SIM-RS</option>
+                        <option value="Rawat Inap Cempaka">Rawat Inap Cempaka</option>
+                        <option value="Rawat Inap Seruni">Rawat Inap Seruni</option>
+                        <option value="Rawat Inap Asoka">Rawat Inap Asoka</option>
+                        <option value="Rawat Inap Perinatologi">Rawat Inap Perinatologi</option>
+                        <option value="VK">VK</option>
+                        <option value="Rawat Inap Bogenvile">Rawat Inap Bogenvile</option>
+                        <option value="Rawat Inap Seroja">Rawat Inap Seroja</option>
+                        <option value="Rawat Inap Tulip">Rawat Inap Tulip</option>
+                        <option value="Rawat Inap Teratai">Rawat Inap Teratai</option>
+                        <option value="Pemulasaran Jenazah">Pemulasaran Jenazah</option>
+                        <option value="IPS-RS">IPS-RS</option>
+                        <option value="Security">Security</option>
+                        <option value="Depo Rawat Inap">Depo Rawat Inap</option>
+                        <option value="Loundry">Loundry</option>
+                        <option value="Dapur Gizi">Dapur Gizi</option>
+                        <option value="Gudang Farmasi">Gudang Farmasi</option>
+                        <option value="Anggrek Tewu">Anggrek Tewu</option>
+                        <option value="Rekam Medik">Rekam Medik</option>
+                        <option value="Costumer Service">Costumer Service</option>
+                        <option value="Sanitasi">Sanitasi</option>
+                        <option value="Pengantar Pasien">Pengantar Pasien</option>
+                        <option value="Code Blue">Code Blue</option>
+                        <option value="Ambulance Rujukan External">Ambulance Rujukan External</option>
+                    </select>
                 </div>
                 <div>
                     <label class="block text-slate-500 mb-1">Risiko</label>
@@ -149,7 +188,46 @@
                 <h2 class="text-xl font-bold text-slate-800">Daftar Risiko & Validasi</h2>
                 <div class="flex items-center mt-2">
                     <span class="text-sm text-slate-500 mr-2">Filter Unit:</span>
-                    <input type="text" x-model="filterUnit" class="p-1 text-sm bg-slate-50 border border-slate-200 rounded text-slate-700 w-40 focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="Ketik unit...">
+                    <select x-model="filterUnit" class="p-1 text-sm bg-slate-50 border border-slate-200 rounded text-slate-700 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                        <option value="">Semua Unit</option>
+                        <option value="UGD">UGD</option>
+                        <option value="Poliklinik">Poliklinik</option>
+                        <option value="PONEK">PONEK</option>
+                        <option value="OK Cyto">OK Cyto</option>
+                        <option value="Laboratorium Patologi Klinik">Laboratorium Patologi Klinik</option>
+                        <option value="Laboratorium Patologi Anatomis">Laboratorium Patologi Anatomis</option>
+                        <option value="Bank Darah">Bank Darah</option>
+                        <option value="Radiologi">Radiologi</option>
+                        <option value="Depo UGD">Depo UGD</option>
+                        <option value="Depo Rawat Jalan">Depo Rawat Jalan</option>
+                        <option value="Dialisis">Dialisis</option>
+                        <option value="ICU">ICU</option>
+                        <option value="OK Elektif">OK Elektif</option>
+                        <option value="SIM-RS">SIM-RS</option>
+                        <option value="Rawat Inap Cempaka">Rawat Inap Cempaka</option>
+                        <option value="Rawat Inap Seruni">Rawat Inap Seruni</option>
+                        <option value="Rawat Inap Asoka">Rawat Inap Asoka</option>
+                        <option value="Rawat Inap Perinatologi">Rawat Inap Perinatologi</option>
+                        <option value="VK">VK</option>
+                        <option value="Rawat Inap Bogenvile">Rawat Inap Bogenvile</option>
+                        <option value="Rawat Inap Seroja">Rawat Inap Seroja</option>
+                        <option value="Rawat Inap Tulip">Rawat Inap Tulip</option>
+                        <option value="Rawat Inap Teratai">Rawat Inap Teratai</option>
+                        <option value="Pemulasaran Jenazah">Pemulasaran Jenazah</option>
+                        <option value="IPS-RS">IPS-RS</option>
+                        <option value="Security">Security</option>
+                        <option value="Depo Rawat Inap">Depo Rawat Inap</option>
+                        <option value="Loundry">Loundry</option>
+                        <option value="Dapur Gizi">Dapur Gizi</option>
+                        <option value="Gudang Farmasi">Gudang Farmasi</option>
+                        <option value="Anggrek Tewu">Anggrek Tewu</option>
+                        <option value="Rekam Medik">Rekam Medik</option>
+                        <option value="Costumer Service">Costumer Service</option>
+                        <option value="Sanitasi">Sanitasi</option>
+                        <option value="Pengantar Pasien">Pengantar Pasien</option>
+                        <option value="Code Blue">Code Blue</option>
+                        <option value="Ambulance Rujukan External">Ambulance Rujukan External</option>
+                    </select>
                 </div>
             </div>
             <div class="relative w-full md:w-72">
