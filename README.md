@@ -1,59 +1,133 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Risk Management System - RSUD dr. Murjani
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Sistem Manajemen Risiko berbasis web untuk RSUD dr. Murjani Sampit.
 
-## About Laravel
+## Fitur
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- Dashboard Eksekutif dengan statistik risiko
+- Daftar Risiko & Validasi Unit
+- Matriks Analisis Risiko (Heatmap)
+- Pengendalian & Evaluasi
+- Export ke Excel
+- Multi-user dengan role admin dan user biasa
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Instalasi
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+```bash
+# Clone repository
+git clone <repo-url>
+cd RSUD.Murjani-RiskManagementSystem
 
-## Learning Laravel
+# Install dependencies
+composer install
+npm install
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+# Setup environment
+cp .env.example .env
+php artisan key:generate
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+# Setup database
+php artisan migrate
+php artisan db:seed
 
-## Laravel Sponsors
+# Run server
+php artisan serve
+```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## Akun Default
 
-### Premium Partners
+### Super Admin (Akses Semua Unit)
+| Email | Password |
+|-------|----------|
+| kusnadijaya@rsudmurjani.id | kusnadijaya1 |
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+### Admin Per Unit (Akses Hanya Unit Masing-masing)
 
-## Contributing
+| No | Unit | Email | Password |
+|----|------|-------|----------|
+| 1 | UGD | ugd@rsudmurjani.id | ugd12345 |
+| 2 | Poliklinik | poliklinik@rsudmurjani.id | poliklinik12345 |
+| 3 | PONEK | ponek@rsudmurjani.id | ponek12345 |
+| 4 | OK Cyto | okcyto@rsudmurjani.id | okcyto12345 |
+| 5 | Lab Patologi Klinik | labpk@rsudmurjani.id | labpk12345 |
+| 6 | Lab Patologi Anatomis | labpa@rsudmurjani.id | labpa12345 |
+| 7 | Bank Darah | bankdarah@rsudmurjani.id | bankdarah12345 |
+| 8 | Radiologi | radiologi@rsudmurjani.id | radiologi12345 |
+| 9 | Depo UGD | depougd@rsudmurjani.id | depougd12345 |
+| 10 | Depo Rawat Jalan | deporj@rsudmurjani.id | deporj12345 |
+| 11 | Dialisis | dialisis@rsudmurjani.id | dialisis12345 |
+| 12 | ICU | icu@rsudmurjani.id | icu12345 |
+| 13 | OK Elektif | okelektif@rsudmurjani.id | okelektif12345 |
+| 14 | SIM-RS | simrs@rsudmurjani.id | simrs12345 |
+| 15 | Rawat Inap Cempaka | ricempaka@rsudmurjani.id | ricempaka12345 |
+| 16 | Rawat Inap Seruni | riseruni@rsudmurjani.id | riseruni12345 |
+| 17 | Rawat Inap Asoka | riasoka@rsudmurjani.id | riasoka12345 |
+| 18 | Rawat Inap Perinatologi | riperina@rsudmurjani.id | riperina12345 |
+| 19 | VK | vk@rsudmurjani.id | vk12345 |
+| 20 | Rawat Inap Bogenvile | ribogen@rsudmurjani.id | ribogen12345 |
+| 21 | Rawat Inap Seroja | riseroja@rsudmurjani.id | riseroja12345 |
+| 22 | Rawat Inap Tulip | ritulip@rsudmurjani.id | ritulip12345 |
+| 23 | Rawat Inap Teratai | riteratai@rsudmurjani.id | riteratai12345 |
+| 24 | Pemulasaran Jenazah | jenazah@rsudmurjani.id | jenazah12345 |
+| 25 | IPS-RS | ipsrs@rsudmurjani.id | ipsrs12345 |
+| 26 | Security | security@rsudmurjani.id | security12345 |
+| 27 | Depo Rawat Inap | depori@rsudmurjani.id | depori12345 |
+| 28 | Loundry | laundry@rsudmurjani.id | laundry12345 |
+| 29 | Dapur Gizi | gizi@rsudmurjani.id | gizi12345 |
+| 30 | Gudang Farmasi | farmasi@rsudmurjani.id | farmasi12345 |
+| 31 | Anggrek Tewu | anggrektewu@rsudmurjani.id | anggrektewu12345 |
+| 32 | Rekam Medik | rekammedik@rsudmurjani.id | rekammedik12345 |
+| 33 | Costumer Service | cs@rsudmurjani.id | cs12345 |
+| 34 | Sanitasi | sanitasi@rsudmurjani.id | sanitasi12345 |
+| 35 | Pengantar Pasien | pengantar@rsudmurjani.id | pengantar12345 |
+| 36 | Code Blue | codeblue@rsudmurjani.id | codeblue12345 |
+| 37 | Ambulance Rujukan External | ambulance@rsudmurjani.id | ambulance12345 |
+| 38 | CSSD | cssd@rsudmurjani.id | cssd12345 |
+| 39 | Depo OK Cyto | depookcyto@rsudmurjani.id | depookcyto12345 |
+| 40 | Depo IBS | depoibs@rsudmurjani.id | depoibs12345 |
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## Teknologi
 
-## Code of Conduct
+- Laravel 11
+- Alpine.js
+- Tailwind CSS
+- Chart.js
+- ExcelJS
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+---
 
-## Security Vulnerabilities
+## Catatan Teknis: Dynamic Date Picker
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### Fitur
+Pemilih periode laporan sekarang **otomatis** mendeteksi tanggal hari ini.
 
-## License
+### Cara Kerja
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Di `resources/views/risk.blade.php`:
+
+```javascript
+init() {
+    // Auto-detect current date
+    const today = new Date();
+    this.periodDate = today.toISOString().split('T')[0]; // Format: YYYY-MM-DD
+    this.updatePeriod();
+}
+
+updatePeriod() {
+    const date = new Date(this.periodDate);
+    const options = { day: 'numeric', month: 'long', year: 'numeric' };
+    this.globalPeriod = date.toLocaleDateString('id-ID', options);
+}
+```
+
+Di `resources/views/partials/register.blade.php`:
+
+```html
+<input type="date" x-model="periodDate" @change="updatePeriod()">
+<span x-text="globalPeriod"></span>
+```
+
+### Hasil
+- **Default**: Tanggal hari ini (contoh: "26 Januari 2026")
+- **Format**: Bahasa Indonesia (hari bulan tahun)
+- User dapat mengubah tanggal sesuai kebutuhan

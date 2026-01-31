@@ -124,10 +124,12 @@
             searchTerm: '',
             filterUnit: '', 
             
-            periodType: 'Triwulan',
-            periodValue: 'II',
-            periodYear: '2024',
-            globalPeriod: 'Triwulan II - 2024',
+            // User unit info from server
+            userUnit: '{{ Auth::user()->unit ?? "" }}',
+            isUnitAdmin: {{ Auth::user()->isUnitAdmin() ? 'true' : 'false' }},
+            
+            periodDate: '',
+            globalPeriod: '',
 
             newRisk: {
                 risiko: '', dampakDeskripsi: '', kategori: 'Strategis', unit: '', penyebab: '',
@@ -139,6 +141,17 @@
             statChartInstance: null,
 
             init() {
+                // Auto-detect current date
+                const today = new Date();
+                this.periodDate = today.toISOString().split('T')[0]; // Format: YYYY-MM-DD
+                this.updatePeriod();
+                
+                // Auto-set unit for unit admins
+                if (this.isUnitAdmin && this.userUnit) {
+                    this.newRisk.unit = this.userUnit;
+                    this.filterUnit = this.userUnit; // Also filter to show only their unit
+                }
+                
                 this.$watch('activeTab', (value) => {
                     if (value === 'dashboard') setTimeout(() => this.updateCharts(), 100);
                     setTimeout(() => { if (window.lucide) window.lucide.createIcons(); }, 50);
@@ -147,7 +160,6 @@
                     if (this.activeTab === 'dashboard') this.updateCharts();
                     setTimeout(() => { if (window.lucide) window.lucide.createIcons(); }, 50);
                 });
-                this.updatePeriod();
                 setTimeout(() => { if (window.lucide) window.lucide.createIcons(); }, 100);
                 if (this.activeTab === 'dashboard') setTimeout(() => this.updateCharts(), 100);
             },
@@ -163,9 +175,10 @@
             },
 
             updatePeriod() {
-                this.globalPeriod = this.periodType === "Tahun" 
-                    ? `Tahun ${this.periodYear}` 
-                    : `${this.periodType} ${this.periodValue} - ${this.periodYear}`;
+                if (!this.periodDate) return;
+                const date = new Date(this.periodDate);
+                const options = { day: 'numeric', month: 'long', year: 'numeric' };
+                this.globalPeriod = date.toLocaleDateString('id-ID', options);
             },
 
             calculateLevel(score) {

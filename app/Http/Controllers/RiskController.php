@@ -15,10 +15,18 @@ class RiskController extends Controller
      */
     public function index(): View
     {
-        // Admin sees all risks, regular users see only their own
-        if (Auth::user()->isAdmin()) {
+        $user = Auth::user();
+        
+        // Super Admin sees all risks
+        if ($user->isAdmin()) {
             $risks = Risk::orderBy('created_at', 'desc')->get();
-        } else {
+        }
+        // Unit Admin sees only their unit's risks
+        elseif ($user->isUnitAdmin()) {
+            $risks = Risk::where('unit', $user->unit)->orderBy('created_at', 'desc')->get();
+        }
+        // Regular users see only their own risks
+        else {
             $risks = Risk::where('user_id', Auth::id())->orderBy('created_at', 'desc')->get();
         }
         
@@ -32,6 +40,13 @@ class RiskController extends Controller
      */
     public function store(Request $request): JsonResponse
     {
+        $user = Auth::user();
+        
+        // Unit admin can only create risks for their unit
+        if ($user->isUnitAdmin()) {
+            $request->merge(['unit' => $user->unit]);
+        }
+        
         $validated = $request->validate([
             'unit' => 'required|string|max:255',
             'kategori' => 'required|string|max:255',
@@ -68,8 +83,10 @@ class RiskController extends Controller
      */
     public function update(Request $request, Risk $risk): JsonResponse
     {
-        // Check ownership (admin can update any, users only their own)
-        if (!Auth::user()->isAdmin() && $risk->user_id !== Auth::id()) {
+        $user = Auth::user();
+        
+        // Check access: Super admin can update any, unit admin only their unit, users only their own
+        if (!$user->isAdmin() && !$user->hasAccessToUnit($risk->unit) && $risk->user_id !== Auth::id()) {
             return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
         }
 
@@ -107,8 +124,10 @@ class RiskController extends Controller
      */
     public function destroy(Risk $risk): JsonResponse
     {
-        // Check ownership (admin can delete any, users only their own)
-        if (!Auth::user()->isAdmin() && $risk->user_id !== Auth::id()) {
+        $user = Auth::user();
+        
+        // Check access: Super admin can delete any, unit admin only their unit, users only their own
+        if (!$user->isAdmin() && !$user->hasAccessToUnit($risk->unit) && $risk->user_id !== Auth::id()) {
             return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
         }
 
@@ -125,10 +144,18 @@ class RiskController extends Controller
      */
     public function statistics(): JsonResponse
     {
-        // Admin sees all, users see only their own
-        if (Auth::user()->isAdmin()) {
+        $user = Auth::user();
+        
+        // Super Admin sees all
+        if ($user->isAdmin()) {
             $risks = Risk::all();
-        } else {
+        }
+        // Unit Admin sees only their unit
+        elseif ($user->isUnitAdmin()) {
+            $risks = Risk::where('unit', $user->unit)->get();
+        }
+        // Regular users see only their own
+        else {
             $risks = Risk::where('user_id', Auth::id())->get();
         }
         
@@ -149,4 +176,3 @@ class RiskController extends Controller
         ]);
     }
 }
-

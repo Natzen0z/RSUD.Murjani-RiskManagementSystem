@@ -13,32 +13,9 @@
             </div>
         </div>
         <div class="flex items-center gap-2">
-            <select x-model="periodType" @change="updatePeriod()" class="p-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium">
-                <option value="Triwulan">Triwulan</option>
-                <option value="Semester">Semester</option>
-                <option value="Tahun">Tahun</option>
-            </select>
-            <select x-show="periodType !== 'Tahun'" x-model="periodValue" @change="updatePeriod()" class="p-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium">
-                <template x-if="periodType === 'Triwulan'">
-                    <optgroup>
-                        <option value="I">I (Jan-Mar)</option>
-                        <option value="II">II (Apr-Jun)</option>
-                        <option value="III">III (Jul-Sep)</option>
-                        <option value="IV">IV (Okt-Des)</option>
-                    </optgroup>
-                </template>
-                <template x-if="periodType === 'Semester'">
-                    <optgroup>
-                        <option value="I">I (Jan-Jun)</option>
-                        <option value="II">II (Jul-Des)</option>
-                    </optgroup>
-                </template>
-            </select>
-            <select x-model="periodYear" @change="updatePeriod()" class="p-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium">
-                <option value="2023">2023</option>
-                <option value="2024">2024</option>
-                <option value="2025">2025</option>
-            </select>
+            <input type="date" x-model="periodDate" @change="updatePeriod()" 
+                class="p-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+            <span class="text-sm text-slate-600 font-medium" x-text="globalPeriod"></span>
         </div>
     </div>
 
@@ -53,46 +30,55 @@
             <div class="md:col-span-3 space-y-3">
                 <div>
                     <label class="block text-slate-500 mb-1">Unit/Bagian</label>
-                    <select x-model="newRisk.unit" class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-teal-500">
-                        <option value="">-- Pilih Unit --</option>
-                        <option value="UGD">UGD</option>
-                        <option value="Poliklinik">Poliklinik</option>
-                        <option value="PONEK">PONEK</option>
-                        <option value="OK Cyto">OK Cyto</option>
-                        <option value="Laboratorium Patologi Klinik">Laboratorium Patologi Klinik</option>
-                        <option value="Laboratorium Patologi Anatomis">Laboratorium Patologi Anatomis</option>
-                        <option value="Bank Darah">Bank Darah</option>
-                        <option value="Radiologi">Radiologi</option>
-                        <option value="Depo UGD">Depo UGD</option>
-                        <option value="Depo Rawat Jalan">Depo Rawat Jalan</option>
-                        <option value="Dialisis">Dialisis</option>
-                        <option value="ICU">ICU</option>
-                        <option value="OK Elektif">OK Elektif</option>
-                        <option value="SIM-RS">SIM-RS</option>
-                        <option value="Rawat Inap Cempaka">Rawat Inap Cempaka</option>
-                        <option value="Rawat Inap Seruni">Rawat Inap Seruni</option>
-                        <option value="Rawat Inap Asoka">Rawat Inap Asoka</option>
-                        <option value="Rawat Inap Perinatologi">Rawat Inap Perinatologi</option>
-                        <option value="VK">VK</option>
-                        <option value="Rawat Inap Bogenvile">Rawat Inap Bogenvile</option>
-                        <option value="Rawat Inap Seroja">Rawat Inap Seroja</option>
-                        <option value="Rawat Inap Tulip">Rawat Inap Tulip</option>
-                        <option value="Rawat Inap Teratai">Rawat Inap Teratai</option>
-                        <option value="Pemulasaran Jenazah">Pemulasaran Jenazah</option>
-                        <option value="IPS-RS">IPS-RS</option>
-                        <option value="Security">Security</option>
-                        <option value="Depo Rawat Inap">Depo Rawat Inap</option>
-                        <option value="Loundry">Loundry</option>
-                        <option value="Dapur Gizi">Dapur Gizi</option>
-                        <option value="Gudang Farmasi">Gudang Farmasi</option>
-                        <option value="Anggrek Tewu">Anggrek Tewu</option>
-                        <option value="Rekam Medik">Rekam Medik</option>
-                        <option value="Costumer Service">Costumer Service</option>
-                        <option value="Sanitasi">Sanitasi</option>
-                        <option value="Pengantar Pasien">Pengantar Pasien</option>
-                        <option value="Code Blue">Code Blue</option>
-                        <option value="Ambulance Rujukan External">Ambulance Rujukan External</option>
-                    </select>
+                    <template x-if="isUnitAdmin">
+                        <input type="text" :value="userUnit" disabled 
+                            class="w-full p-2 border rounded-lg bg-slate-100 text-slate-600 cursor-not-allowed">
+                    </template>
+                    <template x-if="!isUnitAdmin">
+                        <select x-model="newRisk.unit" class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-teal-500">
+                            <option value="">-- Pilih Unit --</option>
+                            <option value="UGD">UGD</option>
+                            <option value="Poliklinik">Poliklinik</option>
+                            <option value="PONEK">PONEK</option>
+                            <option value="OK Cyto">OK Cyto</option>
+                            <option value="Laboratorium Patologi Klinik">Laboratorium Patologi Klinik</option>
+                            <option value="Laboratorium Patologi Anatomis">Laboratorium Patologi Anatomis</option>
+                            <option value="Bank Darah">Bank Darah</option>
+                            <option value="Radiologi">Radiologi</option>
+                            <option value="Depo UGD">Depo UGD</option>
+                            <option value="Depo Rawat Jalan">Depo Rawat Jalan</option>
+                            <option value="Dialisis">Dialisis</option>
+                            <option value="ICU">ICU</option>
+                            <option value="OK Elektif">OK Elektif</option>
+                            <option value="SIM-RS">SIM-RS</option>
+                            <option value="Rawat Inap Cempaka">Rawat Inap Cempaka</option>
+                            <option value="Rawat Inap Seruni">Rawat Inap Seruni</option>
+                            <option value="Rawat Inap Asoka">Rawat Inap Asoka</option>
+                            <option value="Rawat Inap Perinatologi">Rawat Inap Perinatologi</option>
+                            <option value="VK">VK</option>
+                            <option value="Rawat Inap Bogenvile">Rawat Inap Bogenvile</option>
+                            <option value="Rawat Inap Seroja">Rawat Inap Seroja</option>
+                            <option value="Rawat Inap Tulip">Rawat Inap Tulip</option>
+                            <option value="Rawat Inap Teratai">Rawat Inap Teratai</option>
+                            <option value="Pemulasaran Jenazah">Pemulasaran Jenazah</option>
+                            <option value="IPS-RS">IPS-RS</option>
+                            <option value="Security">Security</option>
+                            <option value="Depo Rawat Inap">Depo Rawat Inap</option>
+                            <option value="Loundry">Loundry</option>
+                            <option value="Dapur Gizi">Dapur Gizi</option>
+                            <option value="Gudang Farmasi">Gudang Farmasi</option>
+                            <option value="Anggrek Tewu">Anggrek Tewu</option>
+                            <option value="Rekam Medik">Rekam Medik</option>
+                            <option value="Costumer Service">Costumer Service</option>
+                            <option value="Sanitasi">Sanitasi</option>
+                            <option value="Pengantar Pasien">Pengantar Pasien</option>
+                            <option value="Code Blue">Code Blue</option>
+                            <option value="Ambulance Rujukan External">Ambulance Rujukan External</option>
+                            <option value="CSSD">CSSD</option>
+                            <option value="Depo OK Cyto">Depo OK Cyto</option>
+                            <option value="Depo IBS">Depo IBS</option>
+                        </select>
+                    </template>
                 </div>
                 <div>
                     <label class="block text-slate-500 mb-1">Risiko</label>
@@ -227,6 +213,9 @@
                         <option value="Pengantar Pasien">Pengantar Pasien</option>
                         <option value="Code Blue">Code Blue</option>
                         <option value="Ambulance Rujukan External">Ambulance Rujukan External</option>
+                        <option value="CSSD">CSSD</option>
+                        <option value="Depo OK Cyto">Depo OK Cyto</option>
+                        <option value="Depo IBS">Depo IBS</option>
                     </select>
                 </div>
             </div>
