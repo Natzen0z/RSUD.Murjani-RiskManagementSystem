@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'auth_portal' => [
+        'url'        => env('PORTAL_MURJANI_URL', 'http://127.0.0.1:8000'),
+        'app_secret' => env('PORTAL_MURJANI_APP_TOKEN'),
+    ],
+
 ];

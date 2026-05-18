@@ -61,7 +61,15 @@
                         <tr class="table-row-hover hover:bg-slate-50/50 transition-colors">
                             <td class="px-5 py-4 font-bold text-slate-900 text-xs">{{ $user->name }}</td>
                             <td class="px-5 py-4 text-slate-500 text-xs">{{ $user->email }}</td>
-                            <td class="px-5 py-4 text-slate-500 text-xs">{{ $user->unit ?? '-' }}</td>
+                            <td class="px-5 py-4 text-slate-500 text-xs">
+                                @if($user->units->isNotEmpty())
+                                    {{ implode(', ', $user->units->pluck('name')->toArray()) }}
+                                @elseif($user->unit)
+                                    {{ $user->unit }}
+                                @else
+                                    -
+                                @endif
+                            </td>
                             <td class="px-5 py-4 text-slate-500 text-xs font-bold uppercase">{{ $user->bidang ?? '-' }}</td>
                             <td class="px-5 py-4">
                                 <span class="px-2.5 py-1 rounded-full text-[10px] font-bold {{ $user->role === 'admin' ? 'bg-amber-100 text-amber-700' : ($user->role === 'auditor' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700') }}">
@@ -74,7 +82,7 @@
                             <td class="px-5 py-4 text-center text-slate-700 font-bold text-xs">{{ $user->risks_count }}</td>
                             <td class="px-5 py-4 text-slate-400 text-xs">{{ $user->created_at->format('d M Y') }}</td>
                             <td class="px-5 py-4 text-center flex items-center justify-center space-x-1">
-                                <button @click="editUser = {{ json_encode($user) }}; roleType = editUser.role; showModal = true" class="p-2 text-slate-400 hover:text-teal-500 hover:bg-teal-50 rounded-lg transition-colors">
+                                <button @click="editUser = {{ json_encode($user) }}; editUser.unitsArray = {{ json_encode($user->units->pluck('name')->toArray()) }}; roleType = editUser.role; showModal = true" class="p-2 text-slate-400 hover:text-teal-500 hover:bg-teal-50 rounded-lg transition-colors">
                                     <i data-lucide="edit" class="w-4 h-4"></i>
                                 </button>
                                 @if($user->id !== Auth::id())
@@ -99,7 +107,7 @@
     <div x-show="showModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm" @click.self="showModal = false"
         x-transition:enter="ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
         x-transition:leave="ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
-        <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md mx-4" @click.stop
+        <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto" @click.stop
             x-transition:enter="ease-out duration-200" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100">
             <h3 class="text-lg font-extrabold text-slate-800 mb-6" x-text="editUser ? 'Edit User' : 'Tambah User Baru'"></h3>
             
@@ -131,12 +139,19 @@
                 </div>
                 <div x-show="roleType !== 'auditor'">
                     <label class="block text-xs font-semibold text-slate-500 mb-2 uppercase tracking-wider">Unit/Bagian</label>
-                    <select name="unit" class="w-full p-3 border-[1.5px] border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500 focus:outline-none focus:border-teal-500 text-sm font-medium transition-all" x-bind:disabled="roleType === 'auditor'">
-                        <option value="">-- Tidak Ada Unit --</option>
-                        @foreach($units as $unit)
-                            <option value="{{ $unit->name }}" :selected="editUser && editUser.unit === '{{ $unit->name }}'">{{ $unit->name }}</option>
-                        @endforeach
-                    </select>
+                    <div class="border-[1.5px] border-slate-200 rounded-xl p-3 max-h-48 overflow-y-auto bg-slate-50/50">
+                        <div class="space-y-2">
+                            @foreach($units as $unit)
+                            <label class="flex items-center space-x-3 p-1.5 hover:bg-white rounded-lg transition-colors cursor-pointer">
+                                <input type="checkbox" name="units[]" value="{{ $unit->name }}" 
+                                    class="w-4 h-4 text-teal-600 border-slate-300 rounded focus:ring-teal-500"
+                                    :checked="editUser && editUser.unitsArray && editUser.unitsArray.includes('{{ $unit->name }}')"
+                                    x-bind:disabled="roleType === 'auditor'">
+                                <span class="text-sm font-medium text-slate-700">{{ $unit->name }}</span>
+                            </label>
+                            @endforeach
+                        </div>
+                    </div>
                 </div>
                 <div x-show="roleType === 'auditor'" x-cloak>
                     <label class="block text-xs font-semibold text-slate-500 mb-2 uppercase tracking-wider">Unit/Bagian</label>

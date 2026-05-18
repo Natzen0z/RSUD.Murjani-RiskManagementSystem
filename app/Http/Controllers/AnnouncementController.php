@@ -118,7 +118,8 @@ class AnnouncementController extends Controller
             });
 
         // Filtering logic based on user's bidang/unit
-        $query->where(function ($q) use ($user) {
+        $userUnits = $user->getUnitNames();
+        $query->where(function ($q) use ($user, $userUnits) {
             // Global announcements (no target bidang, units, or users)
             $q->where(function ($sq) {
                 $sq->where(function($ssq) {
@@ -134,7 +135,11 @@ class AnnouncementController extends Controller
             // Targeted to user's bidang
             ->orWhere('bidang', $user->bidang)
             // Targeted to user's unit (SQLite-friendly LIKE check)
-            ->orWhere('target_units', 'LIKE', '%"' . $user->unit . '"%')
+            ->orWhere(function($subq) use ($userUnits) {
+                foreach($userUnits as $uName) {
+                    $subq->orWhere('target_units', 'LIKE', '%"' . $uName . '"%');
+                }
+            })
             // Targeted specifically to this user
             ->orWhere('target_users', 'LIKE', '%"' . $user->name . '"%');
         });

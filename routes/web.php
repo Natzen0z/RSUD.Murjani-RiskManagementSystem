@@ -9,14 +9,19 @@ use App\Http\Middleware\AdminMiddleware;
 use App\Http\Middleware\AuditorMiddleware;
 use Illuminate\Support\Facades\Route;
 
-// Public routes
-Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login')->middleware('guest');
-Route::post('/login', [AuthController::class, 'login'])->middleware('guest');
+// SSO Auth Routes
+Route::get('/login/sso/callback', [\App\Http\Controllers\SsoCallbackController::class, 'handle'])->name('sso.callback');
+
+// Redirect local login to Portal
+Route::get('/login', function () {
+    $portalUrl = config('services.auth_portal.url');
+    return redirect()->away($portalUrl . '/launch/manajemen-risiko');
+})->name('login')->middleware('guest');
 
 // Authenticated routes
 Route::middleware('auth')->group(function () {
-    // Logout
-    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+    // Logout (SSO)
+    Route::post('/logout', [\App\Http\Controllers\SsoCallbackController::class, 'logout'])->name('logout');
 
     // Risk management (for all authenticated users)
     Route::get('/', [RiskController::class, 'index'])->name('risk.index');
@@ -39,6 +44,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/units', [AdminController::class, 'units'])->name('admin.units');
         Route::post('/units', [AdminController::class, 'storeUnit'])->name('admin.units.store');
         Route::delete('/units/{unit}', [AdminController::class, 'destroyUnit'])->name('admin.units.destroy');
+        Route::post('/units/{unit}/users/sync', [AdminController::class, 'syncUnitUsers'])->name('admin.units.users.sync');
 
         // Sub-Unit management
         Route::get('/sub-units', [AdminController::class, 'subUnits'])->name('admin.sub_units');

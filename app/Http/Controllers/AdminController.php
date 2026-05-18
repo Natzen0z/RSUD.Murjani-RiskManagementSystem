@@ -34,7 +34,7 @@ class AdminController extends Controller
      */
     public function users(): View
     {
-        $users = User::withCount('risks')->orderBy('created_at', 'desc')->get();
+        $users = User::with(['units'])->withCount('risks')->orderBy('created_at', 'desc')->get();
         $units = Unit::orderBy('name', 'asc')->get();
         return view('admin.users', compact('users', 'units'));
     }
@@ -49,21 +49,26 @@ class AdminController extends Controller
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:6',
             'role' => 'required|in:admin,user,auditor',
-            'unit' => 'nullable|string|max:255',
+            'units' => 'nullable|array',
             'sub_unit' => 'nullable|string|max:255',
             'bidang' => 'nullable|string|max:255',
         ]);
 
-        User::create([
+        $user = User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
             'password_plain' => $validated['password'],
             'role' => $validated['role'],
-            'unit' => $validated['unit'] ?? null,
+            'unit' => null, // Legacy field not strictly used for new UI but kept nullable
             'sub_unit' => $validated['sub_unit'] ?? null,
             'bidang' => $validated['bidang'] ?? null,
         ]);
+
+        if (!empty($validated['units'])) {
+            $unitIds = Unit::whereIn('name', $validated['units'])->pluck('id');
+            $user->units()->sync($unitIds);
+        }
 
         return back()->with('success', 'User berhasil ditambahkan.');
     }
@@ -78,7 +83,7 @@ class AdminController extends Controller
             'email' => 'required|email|unique:users,email,' . $user->id,
             'password' => 'nullable|string|min:6',
             'role' => 'required|in:admin,user,auditor',
-            'unit' => 'nullable|string|max:255',
+            'units' => 'nullable|array',
             'sub_unit' => 'nullable|string|max:255',
             'bidang' => 'nullable|string|max:255',
         ]);
@@ -87,7 +92,6 @@ class AdminController extends Controller
             'name' => $validated['name'],
             'email' => $validated['email'],
             'role' => $validated['role'],
-            'unit' => $validated['unit'] ?? null,
             'sub_unit' => $validated['sub_unit'] ?? null,
             'bidang' => $validated['bidang'] ?? null,
         ];
@@ -98,6 +102,9 @@ class AdminController extends Controller
         }
 
         $user->update($data);
+
+        $unitIds = !empty($validated['units']) ? Unit::whereIn('name', $validated['units'])->pluck('id') : [];
+        $user->units()->sync($unitIds);
 
         return back()->with('success', 'User berhasil diperbarui.');
     }
@@ -134,8 +141,9 @@ class AdminController extends Controller
      */
     public function units(): View
     {
-        $units = Unit::orderBy('name', 'asc')->get();
-        return view('admin.units', compact('units'));
+        $units = Unit::with('users')->orderBy('name', 'asc')->get();
+        $users = User::orderBy('name', 'asc')->get();
+        return view('admin.units', compact('units', 'users'));
     }
 
     /**
@@ -151,6 +159,21 @@ class AdminController extends Controller
         Unit::create($validated);
 
         return back()->with('success', 'Unit berhasil ditambahkan.');
+    }
+
+    /**
+     * Sync users to unit
+     */
+    public function syncUnitUsers(Request $request, Unit $unit): RedirectResponse
+    {
+        $validated = $request->validate([
+            'user_ids' => 'array',
+            'user_ids.*' => 'exists:users,id',
+        ]);
+
+        $unit->users()->sync($validated['user_ids'] ?? []);
+
+        return back()->with('success', "Users berhasil di-update untuk Unit {$unit->name}.");
     }
 
     /**
