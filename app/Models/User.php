@@ -56,7 +56,7 @@ class User extends Authenticatable
      */
     public function isAdmin(): bool
     {
-        return $this->role === 'admin' && $this->unit === null;
+        return $this->role === 'admin' && empty($this->unit) && $this->units->isEmpty();
     }
 
     /**
@@ -72,7 +72,7 @@ class User extends Authenticatable
      */
     public function isUnitAdmin(): bool
     {
-        return $this->role === 'admin' && $this->unit !== null;
+        return $this->role === 'admin' && (!empty($this->unit) || $this->units->isNotEmpty());
     }
 
     /**
@@ -80,20 +80,34 @@ class User extends Authenticatable
      */
     public function isWadir(): bool
     {
-        return $this->role === 'admin' && (str_contains($this->unit, 'Wadir') || str_contains($this->unit, 'Wakil Direktur'));
+        if ($this->role !== 'admin') return false;
+
+        if (!empty($this->unit) && (str_contains($this->unit, 'Wadir') || str_contains($this->unit, 'Wakil Direktur'))) {
+            return true;
+        }
+
+        return $this->units->contains(function ($u) {
+            return str_contains($u->name, 'Wadir') || str_contains($u->name, 'Wakil Direktur');
+        });
     }
 
     /**
      * Check if user has access to a specific unit
      */
-    public function hasAccessToUnit(string $unit): bool
+    public function hasAccessToUnit(string $unitName): bool
     {
         // Super admin has access to all units
         if ($this->isAdmin()) {
             return true;
         }
-        // Unit admin only has access to their own unit
-        return $this->unit === $unit;
+        
+        // Check legacy column
+        if ($this->unit === $unitName) {
+            return true;
+        }
+
+        // Check pivot relationship
+        return $this->units->contains('name', $unitName);
     }
 
     /**
@@ -102,6 +116,39 @@ class User extends Authenticatable
     public function isRestrictedToUnit(): bool
     {
         return !$this->isAdmin() && $this->email !== 'direktur@rsudmurjani.id';
+    }
+
+    /**
+     * Get primary unit for backward compatibility
+     */
+    public function getPrimaryUnitAttribute()
+    {
+        if (!empty($this->unit)) {
+            return $this->unit;
+        }
+        
+        $first = $this->units->first();
+        return $first ? $first->name : null;
+    }
+
+    /**
+     * Get all unit names for the user (legacy + relational)
+     */
+    public function getUnitNames(): array
+    {
+        $units = $this->units->pluck('name')->toArray();
+        if (!empty($this->unit) && !in_array($this->unit, $units)) {
+            $units[] = $this->unit;
+        }
+        return $units;
+    }
+
+    /**
+     * Get the units this user belongs to
+     */
+    public function units()
+    {
+        return $this->belongsToMany(Unit::class);
     }
 
     /**

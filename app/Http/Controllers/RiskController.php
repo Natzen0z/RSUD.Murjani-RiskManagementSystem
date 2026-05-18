@@ -18,7 +18,7 @@ class RiskController extends Controller
     public function index()
     {
         $user = Auth::user();
-
+        $userUnits = $user->getUnitNames();
         // Redirect Auditor strictly to their own dashboard
         if ($user->isAuditor()) {
             return redirect()->route('auditor.dashboard');
@@ -44,9 +44,9 @@ class RiskController extends Controller
         // Others see only risks within their "unit" OR risks shared with their "unit"
         else {
             $risks = Risk::with('mitigations')
-                ->where(function($query) use ($user) {
-                    if ($user->unit) {
-                        $query->where('unit', $user->unit)
+                ->where(function($query) use ($user, $userUnits) {
+                    if (!empty($userUnits)) {
+                        $query->whereIn('unit', $userUnits)
                               ->orWhereJsonContains('shared_with', $user->name);
                     } else {
                         // If no unit, they see nothing (or maybe only public ones if any)
@@ -75,7 +75,7 @@ class RiskController extends Controller
             ->where(function ($q) {
                 $q->whereNull('expires_at')->orWhere('expires_at', '>', now());
             })
-            ->where(function ($q) use ($user) {
+            ->where(function ($q) use ($user, $userUnits) {
                 // Global announcements
                 $q->where(function ($sq) {
                     $sq->where(function($ssq) {
@@ -90,7 +90,11 @@ class RiskController extends Controller
                 })
                 // Targeted checks (SQLite-friendly)
                 ->orWhere('bidang', $user->bidang)
-                ->orWhere('target_units', 'LIKE', '%"' . $user->unit . '"%')
+                ->orWhere(function($subq) use ($user, $userUnits) {
+                    foreach($userUnits as $uName) {
+                        $subq->orWhere('target_units', 'LIKE', '%"' . $uName . '"%');
+                    }
+                })
                 ->orWhere('target_users', 'LIKE', '%"' . $user->name . '"%');
             })
             ->latest()
@@ -109,7 +113,8 @@ class RiskController extends Controller
             }
         } else {
             // Unit users see all their own assessments (Draft, Submitted, Final)
-            $assessments = \App\Models\AuditAssessment::where('unit', $user->unit)
+            $userUnits = $user->getUnitNames();
+            $assessments = \App\Models\AuditAssessment::whereIn('unit', $userUnits)
                 ->orderBy('created_at', 'desc')->get();
         }
         
@@ -185,7 +190,7 @@ class RiskController extends Controller
         
         // Unit admin can only create risks for their unit
         if ($user->isUnitAdmin()) {
-            $request->merge(['unit' => $user->unit]);
+            $request->merge(['unit' => $user->primary_unit]);
         }
         
         $validated = $request->validate([
@@ -266,7 +271,8 @@ class RiskController extends Controller
         }
 
         // Check access: Super admin or owner can update
-        if (!$user->isAdmin() && $user->unit !== $risk->unit && $user->bidang !== $risk->bidang) {
+        $userUnits = $user->getUnitNames();
+        if (!$user->isAdmin() && !in_array($risk->unit, $userUnits) && $user->bidang !== $risk->bidang) {
             return response()->json(['success' => false, 'message' => 'Unauthorized: Anda tidak memiliki akses ke data unit ini.'], 403);
         }
 
@@ -359,7 +365,8 @@ class RiskController extends Controller
         }
 
         // Check access: Super admin or owner can delete
-        if (!$user->isAdmin() && $user->unit !== $risk->unit && $user->bidang !== $risk->bidang) {
+        $userUnits = $user->getUnitNames();
+        if (!$user->isAdmin() && !in_array($risk->unit, $userUnits) && $user->bidang !== $risk->bidang) {
             return response()->json(['success' => false, 'message' => 'Unauthorized: Anda tidak memiliki akses ke data unit ini.'], 403);
         }
 
@@ -384,9 +391,16 @@ class RiskController extends Controller
         }
         // Others see only statistics for their unit OR risks shared with their unit
         else {
-            $risks = Risk::where(function($query) use ($user) {
-                    $query->where('unit', $user->unit)
-                          ->orWhereJsonContains('shared_with', $user->unit);
+            $userUnits = $user->getUnitNames();
+            $risks = Risk::where(function($query) use ($userUnits) {
+                    if (!empty($userUnits)) {
+                        $query->whereIn('unit', $userUnits);
+                        foreach($userUnits as $uName) {
+                            $query->orWhereJsonContains('shared_with', $uName);
+                        }
+                    } else {
+                        $query->whereRaw('1 = 0');
+                    }
                 })->get();
         }
         

@@ -389,7 +389,8 @@
             baseRiskUrl: '{{ url("/risks") }}',
             
             // User unit info from server
-            userUnit: '{{ Auth::user()->unit ?? "" }}',
+            userUnit: '{{ Auth::user()->primary_unit ?? "" }}',
+            userUnits: @json(Auth::user()->getUnitNames()),
             userEmail: '{{ Auth::user()->email }}',
             userName: '{{ Auth::user()->name }}',
             userBidang: '{{ Auth::user()->bidang }}',
@@ -502,9 +503,9 @@
                     let matchesType = true;
                     if (this.isRestricted) {
                         if (this.filterType === 'own') {
-                            matchesType = item.unit === this.userUnit;
+                            matchesType = this.userUnits.includes(item.unit);
                         } else if (this.filterType === 'shared') {
-                            matchesType = item.unit !== this.userUnit;
+                            matchesType = !this.userUnits.includes(item.unit);
                         }
                     } else {
                         // For Admin, filterUnit still works as before or we use filterType
@@ -1034,7 +1035,7 @@
 
             get userUnitAssessment() {
                 if (this.isUnitAdmin && this.assessmentsData.length > 0) {
-                    return this.assessmentsData.find(a => a.unit === this.userUnit);
+                    return this.assessmentsData.find(a => this.userUnits.includes(a.unit));
                 }
                 return null;
             },

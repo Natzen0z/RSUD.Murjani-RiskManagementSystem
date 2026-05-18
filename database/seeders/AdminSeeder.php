@@ -157,5 +157,6 @@ class AdminSeeder extends Seeder
         foreach ($categories as $categoryName) {
             Category::create(['name' => $categoryName]);
         }
+        }
     }
 }
