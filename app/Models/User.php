@@ -17,15 +17,27 @@ class User extends Authenticatable
      *
      * @var list<string>
      */
+    public const DEFAULT_FEATURES = [
+        'dashboard',
+        'register',
+        'matrix',
+        'controls',
+        'assessment',
+    ];
+
     protected $fillable = [
         'name',
+        'username',
+        'nip',
         'email',
         'password',
         'password_plain',
         'role',
+        'is_active',
         'unit',
         'sub_unit',
         'bidang',
+        'features',
     ];
 
     /**
@@ -48,7 +60,31 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_active' => 'boolean',
+            'features' => 'array',
         ];
+    }
+
+    /**
+     * Default sidebar tabs for regular users.
+     */
+    public static function defaultFeatures(): array
+    {
+        return self::DEFAULT_FEATURES;
+    }
+
+    /**
+     * Whether this user may access a sidebar tab (admins/auditors see all).
+     */
+    public function hasFeature(string $feature): bool
+    {
+        if ($this->isAdmin() || $this->isAuditor() || $this->email === 'direktur@rsudmurjani.id') {
+            return true;
+        }
+
+        $features = $this->features ?? self::defaultFeatures();
+
+        return in_array($feature, $features, true);
     }
 
     /**

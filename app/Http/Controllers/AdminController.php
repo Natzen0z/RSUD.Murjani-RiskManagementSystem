@@ -8,6 +8,7 @@ use App\Models\Unit;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 
@@ -54,19 +55,27 @@ class AdminController extends Controller
             'bidang' => 'nullable|string|max:255',
         ]);
 
-        $user = User::create([
+        $unitNames = $validated['units'] ?? [];
+
+        $userData = [
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
             'password_plain' => $validated['password'],
             'role' => $validated['role'],
-            'unit' => null, // Legacy field not strictly used for new UI but kept nullable
+            'unit' => $unitNames[0] ?? null,
             'sub_unit' => $validated['sub_unit'] ?? null,
             'bidang' => $validated['bidang'] ?? null,
-        ]);
+        ];
 
-        if (!empty($validated['units'])) {
-            $unitIds = Unit::whereIn('name', $validated['units'])->pluck('id');
+        if (Schema::hasColumn('users', 'features') && $validated['role'] === 'user') {
+            $userData['features'] = User::defaultFeatures();
+        }
+
+        $user = User::create($userData);
+
+        if (!empty($unitNames)) {
+            $unitIds = Unit::whereIn('name', $unitNames)->pluck('id');
             $user->units()->sync($unitIds);
         }
 
@@ -88,10 +97,13 @@ class AdminController extends Controller
             'bidang' => 'nullable|string|max:255',
         ]);
 
+        $unitNames = $validated['units'] ?? [];
+
         $data = [
             'name' => $validated['name'],
             'email' => $validated['email'],
             'role' => $validated['role'],
+            'unit' => $unitNames[0] ?? null,
             'sub_unit' => $validated['sub_unit'] ?? null,
             'bidang' => $validated['bidang'] ?? null,
         ];
@@ -101,9 +113,17 @@ class AdminController extends Controller
             $data['password_plain'] = $validated['password'];
         }
 
+        if (Schema::hasColumn('users', 'features')) {
+            if ($validated['role'] === 'user') {
+                $data['features'] = $user->features ?? User::defaultFeatures();
+            } else {
+                $data['features'] = null;
+            }
+        }
+
         $user->update($data);
 
-        $unitIds = !empty($validated['units']) ? Unit::whereIn('name', $validated['units'])->pluck('id') : [];
+        $unitIds = !empty($unitNames) ? Unit::whereIn('name', $unitNames)->pluck('id') : [];
         $user->units()->sync($unitIds);
 
         return back()->with('success', 'User berhasil diperbarui.');
